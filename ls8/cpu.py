@@ -10,8 +10,12 @@ class CPU:
         self.registers = [0] * 8     # 8 general-purpose registers.
         self.pc = 0                  # internal register prop
 
-     def ram_read(self, address):
+    # RAM functions
+    def ram_read(self, address):
         return self.memory[address]
+    
+    def ram_write(self, value, address):
+        self.memory[address] = value
      
     def load(self):
         """Load a program into memory."""
