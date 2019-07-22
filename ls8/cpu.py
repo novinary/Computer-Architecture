@@ -6,9 +6,10 @@ class CPU:
     """Main CPU class."""
 
     def __init__(self):
-        """Construct a new CPU."""
-        pass
-
+        self.memory = 256 * [0]      # hold 256 bytes of memory   
+        self.registers = [0] * 8     # 8 general-purpose registers.
+        self.pc = 0                  # internal register prop
+     
     def load(self):
         """Load a program into memory."""
 
