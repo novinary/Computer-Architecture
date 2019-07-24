@@ -14,6 +14,7 @@ class CPU:
             "LDI": 0b10000010,    # load "immediate", store a value in a register, or "set this register to this value".
             "PRN": 0b01000111,    # a pseudo-instruction that prints the numeric value stored in a register.
             "HLT": 0b00000001,    # halt the CPU and exit the emulator.
+            "MUL": 0b10100010
         }
 
     # RAM functions
@@ -23,26 +24,47 @@ class CPU:
     def ram_write(self, value, address):
         self.ram[address] = value
      
-    def load(self):
+    def load(self, filename):
         """Load a program into memory."""
+
+        # address = 0
+
+        # # For now, we've just hardcoded a program:
+
+        # program = [
+        #     # From print8.ls8
+        #     0b10000010, # LDI R0,8
+        #     0b00000000,
+        #     0b00001000,
+        #     0b01000111, # PRN R0
+        #     0b00000000,
+        #     0b00000001, # HLT
+        # ]
+
+        # for instruction in program:
+        #     self.ram[address] = instruction
+        #     address += 1
+        # print(sys.argv[0])
+        # print(sys.argv[1])
 
         address = 0
 
-        # For now, we've just hardcoded a program:
-
-        program = [
-            # From print8.ls8
-            0b10000010, # LDI R0,8
-            0b00000000,
-            0b00001000,
-            0b01000111, # PRN R0
-            0b00000000,
-            0b00000001, # HLT
-        ]
-
-        for instruction in program:
-            self.ram[address] = instruction
-            address += 1
+        try:
+            with open(filename) as f:
+                for line in f:
+                    # split before and after any comment symbols
+                    comment_split = line.split('#')
+                    # convert the pre-comment portion to a value
+                    number = comment_split[0].strip()  # trim whitespace
+                    if number == "":
+                        continue  # ignore blank lines
+                    val = int(number, 2)
+                    # store it in memory
+                    self.ram_write(val, address)
+                    address += 1
+        except FileNotFoundError:
+            print(f"{sys.argv[0]}: {filename} not found")
+            sys.exit(2)
 
 
     def alu(self, op, reg_a, reg_b):
@@ -51,6 +73,8 @@ class CPU:
         if op == "ADD":
             self.reg[reg_a] += self.reg[reg_b]
         #elif op == "SUB": etc
+        if op == "MUL":
+            self.reg[reg_a] *= self.reg[reg_b]
         else:
             raise Exception("Unsupported ALU operation")
 
@@ -86,6 +110,7 @@ class CPU:
             # Decode
             if instruction == self.opcodes['HLT']:
                 self.running = False
+                sys.exit(1)
             elif instruction == self.opcodes['LDI']:
                 reg_data = self.ram[self.pc+1]
                 reg_val = self.ram[self.pc+2]
@@ -95,7 +120,11 @@ class CPU:
                 reg_data = self.ram[self.pc+1]
                 print(self.reg[reg_data])
                 self.pc += 2
-        
+            elif instruction == self.opcodes['MUL']:
+                reg_data = self.ram_read(self.pc + 1)
+                reg_val = self.ram_read(self.pc + 2)
+                self.alu('MUL', reg_data, reg_val)
+                self.pc += 3
             else:
                 sys.exit(1)
 
