@@ -9,20 +9,35 @@ class CPU:
         self.ram = 256 * [0]      # hold 256 bytes of memory   
         self.reg = [0] * 8        # 8 general-purpose registers.
         self.pc = 0               # internal register prop
+        self.reg[7] = 0xFF        # Add stack pointer 
+        self.sp = 7               # Set it to 7
         # opcodes
         self.opcodes = {
             "LDI": 0b10000010,    # load "immediate", store a value in a register, or "set this register to this value".
             "PRN": 0b01000111,    # a pseudo-instruction that prints the numeric value stored in a register.
             "HLT": 0b00000001,    # halt the CPU and exit the emulator.
-            "MUL": 0b10100010
+            "MUL": 0b10100010,
+            "PUSH": 0b01000101,
+            "POP": 0b01000110
         }
 
     # RAM functions
     def ram_read(self, address):
         return self.ram[address]
     
-    def ram_write(self, value, address):
+    def ram_write(self, address, value):
         self.ram[address] = value
+
+    # stack_push function 
+    def stack_push(self, value):
+        self.alu("DEC", self.sp, self.reg[value])
+        self.ram_write(self.reg[self.sp], value)
+
+    # stack_pop function 
+    def stack_pop(self, value):
+        popped = self.ram_read(self.reg[self.sp])
+        self.alu("INC", self.sp, value)
+        return popped
      
     def load(self, filename):
         """Load a program into memory."""
@@ -60,7 +75,7 @@ class CPU:
                         continue  # ignore blank lines
                     val = int(number, 2)
                     # store it in memory
-                    self.ram_write(val, address)
+                    self.ram_write(address, val)
                     address += 1
         except FileNotFoundError:
             print(f"{sys.argv[0]}: {filename} not found")
@@ -73,8 +88,14 @@ class CPU:
         if op == "ADD":
             self.reg[reg_a] += self.reg[reg_b]
         #elif op == "SUB": etc
-        if op == "MUL":
+        elif op == "MUL":
             self.reg[reg_a] *= self.reg[reg_b]
+        # increment op for stack
+        elif op == "INC":
+            self.reg[reg_a] += 1
+        # decrement op for stack
+        elif op == "DEC":
+            self.reg[reg_a] -= 1
         else:
             raise Exception("Unsupported ALU operation")
 
@@ -125,6 +146,14 @@ class CPU:
                 reg_val = self.ram_read(self.pc + 2)
                 self.alu('MUL', reg_data, reg_val)
                 self.pc += 3
+            elif instruction == self.opcodes['PUSH']:
+                reg_data = self.ram_read(self.pc + 1)
+                self.stack_push(self.reg[reg_data])
+                self.pc += 2
+            elif instruction == self.opcodes['POP']:
+                reg_data = self.ram_read(self.pc + 1)
+                self.reg[reg_data] = self.stack_pop(self.reg[reg_data])
+                self.pc += 2
             else:
                 sys.exit(1)
 
