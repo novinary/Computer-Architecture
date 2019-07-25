@@ -18,7 +18,9 @@ class CPU:
             "HLT": 0b00000001,    # halt the CPU and exit the emulator.
             "MUL": 0b10100010,
             "PUSH": 0b01000101,
-            "POP": 0b01000110
+            "POP": 0b01000110,
+            "CALL": 0b01010000,
+            "RET": 0b00010001
         }
 
     # RAM functions
