@@ -20,7 +20,8 @@ class CPU:
             "PUSH": 0b01000101,
             "POP": 0b01000110,
             "CALL": 0b01010000,
-            "RET": 0b00010001
+            "RET": 0b00010001,
+            "ADD": 0b10100000
         }
 
     # RAM functions
@@ -45,6 +46,11 @@ class CPU:
     def RET(self, value):
         self.pc = self.stack_pop(self)
      
+    # add function to check for output
+    def ADD(self, reg_data, reg_val):
+        self.alu("ADD", reg_data, reg_val)
+        self.pc += 3
+
     def load(self, filename):
         """Load a program into memory."""
 
@@ -167,6 +173,11 @@ class CPU:
                 self.pc = self.reg[next_instruction]
             elif instruction == self.opcodes['RET']:
                 self.pc = self.stack_pop(self)
+            elif instruction == self.opcodes['ADD']:
+                reg_data = self.ram_read(self.pc + 1)
+                reg_val = self.ram_read(self.pc + 2)
+                self.alu("ADD", reg_data, reg_val)
+                self.pc += 3
             else:
                 sys.exit(1)
 
