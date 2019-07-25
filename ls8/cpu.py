@@ -40,6 +40,10 @@ class CPU:
         popped = self.ram_read(self.reg[self.sp])
         self.alu("INC", self.sp, value)
         return popped
+    
+    # return function 
+    def RET(self, value):
+        self.pc = self.stack_pop(self)
      
     def load(self, filename):
         """Load a program into memory."""
@@ -156,6 +160,13 @@ class CPU:
                 reg_data = self.ram_read(self.pc + 1)
                 self.reg[reg_data] = self.stack_pop(self.reg[reg_data])
                 self.pc += 2
+            elif instruction == self.opcodes['CALL']:
+                self.reg[self.sp] -= 1
+                self.ram[self.reg[self.sp]] = self.pc + 2
+                next_instruction = self.ram[self.pc + 1]
+                self.pc = self.reg[next_instruction]
+            elif instruction == self.opcodes['RET']:
+                self.pc = self.stack_pop(self)
             else:
                 sys.exit(1)
 
