@@ -11,6 +11,7 @@ class CPU:
         self.pc = 0               # internal register prop
         self.reg[7] = 0xFF        # Add stack pointer 
         self.sp = 7               # Set it to 7
+        self.fl = 0b00000000
         # opcodes
         self.opcodes = {
             "LDI": 0b10000010,    # load "immediate", store a value in a register, or "set this register to this value".
