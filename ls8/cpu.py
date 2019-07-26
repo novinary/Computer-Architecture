@@ -22,7 +22,8 @@ class CPU:
             "POP": 0b01000110,
             "CALL": 0b01010000,
             "RET": 0b00010001,
-            "ADD": 0b10100000
+            "ADD": 0b10100000,
+            "CMP": 0b10100111
         }
 
     # RAM functions
@@ -50,6 +51,11 @@ class CPU:
     # add function to check for output
     def ADD(self, reg_data, reg_val):
         self.alu("ADD", reg_data, reg_val)
+        self.pc += 3
+
+    # CMP
+    def CMP(self, reg_data, reg_val):
+        self.alu("CMP", reg_data, reg_val)
         self.pc += 3
 
     def load(self, filename):
@@ -142,39 +148,39 @@ class CPU:
             # Fetch
             instruction = self.ram[self.pc]
             # Decode
-            if instruction == self.opcodes['HLT']:
+            if instruction == self.opcodes["HLT"]:
                 self.running = False
                 sys.exit(1)
-            elif instruction == self.opcodes['LDI']:
+            elif instruction == self.opcodes["LDI"]:
                 reg_data = self.ram[self.pc+1]
                 reg_val = self.ram[self.pc+2]
                 self.reg[reg_data] = reg_val
                 self.pc += 3
-            elif instruction == self.opcodes['PRN']:
+            elif instruction == self.opcodes["PRN"]:
                 reg_data = self.ram[self.pc+1]
                 print(self.reg[reg_data])
                 self.pc += 2
-            elif instruction == self.opcodes['MUL']:
+            elif instruction == self.opcodes["MUL"]:
                 reg_data = self.ram_read(self.pc + 1)
                 reg_val = self.ram_read(self.pc + 2)
-                self.alu('MUL', reg_data, reg_val)
+                self.alu("MUL", reg_data, reg_val)
                 self.pc += 3
-            elif instruction == self.opcodes['PUSH']:
+            elif instruction == self.opcodes["PUSH"]:
                 reg_data = self.ram_read(self.pc + 1)
                 self.stack_push(self.reg[reg_data])
                 self.pc += 2
-            elif instruction == self.opcodes['POP']:
+            elif instruction == self.opcodes["POP"]:
                 reg_data = self.ram_read(self.pc + 1)
                 self.reg[reg_data] = self.stack_pop(self.reg[reg_data])
                 self.pc += 2
-            elif instruction == self.opcodes['CALL']:
+            elif instruction == self.opcodes["CALL"]:
                 self.reg[self.sp] -= 1
                 self.ram[self.reg[self.sp]] = self.pc + 2
                 next_instruction = self.ram[self.pc + 1]
                 self.pc = self.reg[next_instruction]
-            elif instruction == self.opcodes['RET']:
+            elif instruction == self.opcodes["RET"]:
                 self.pc = self.stack_pop(self)
-            elif instruction == self.opcodes['ADD']:
+            elif instruction == self.opcodes["ADD"]:
                 reg_data = self.ram_read(self.pc + 1)
                 reg_val = self.ram_read(self.pc + 2)
                 self.alu("ADD", reg_data, reg_val)
