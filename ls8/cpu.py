@@ -115,6 +115,14 @@ class CPU:
         # decrement op for stack
         elif op == "DEC":
             self.reg[reg_a] -= 1
+        # change flags based on the operands given to the CMP opcode.
+        elif op == "CMP":
+            if self.reg[reg_a] > self.reg[reg_b]:
+                self.fl = 0b00000010
+            elif self.reg[reg_a] == self.reg[reg_b]:
+                self.fl = 0b00000001
+            else:
+                self.fl = 0b00000100
         else:
             raise Exception("Unsupported ALU operation")
 
