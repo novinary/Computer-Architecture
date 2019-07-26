@@ -23,7 +23,9 @@ class CPU:
             "CALL": 0b01010000,
             "RET": 0b00010001,
             "ADD": 0b10100000,
-            "CMP": 0b10100111
+            "CMP": 0b10100111,
+            "JMP": 0b01010100,
+            "JEQ": 0b01010101
         }
 
     # RAM functions
@@ -57,6 +59,20 @@ class CPU:
     def CMP(self, reg_data, reg_val):
         self.alu("CMP", reg_data, reg_val)
         self.pc += 3
+    
+    # JMP
+    def JMP(self, reg_data, reg_val):
+        # Set the pc to be the address stored in the given register
+        self.pc = self.reg[operand_a]
+
+    # JEQ
+    def JEQ(self, reg_data, reg_val):
+        # Check if equal flag is set
+        # Then jump to the address stored in the given register
+        if self.fl == 0b00000001:
+            self.pc = self.reg[operand_a]
+        else:
+            self.pc += 2
 
     def load(self, filename):
         """Load a program into memory."""
