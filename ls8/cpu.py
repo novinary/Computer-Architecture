@@ -25,7 +25,8 @@ class CPU:
             "ADD": 0b10100000,
             "CMP": 0b10100111,
             "JMP": 0b01010100,
-            "JEQ": 0b01010101
+            "JEQ": 0b01010101,
+            "JNE": 0b01010110
         }
 
     # RAM functions
@@ -54,25 +55,6 @@ class CPU:
     def ADD(self, reg_data, reg_val):
         self.alu("ADD", reg_data, reg_val)
         self.pc += 3
-
-    # CMP
-    def CMP(self, reg_data, reg_val):
-        self.alu("CMP", reg_data, reg_val)
-        self.pc += 3
-    
-    # JMP
-    def JMP(self, reg_data, reg_val):
-        # Set the pc to be the address stored in the given register
-        self.pc = self.reg[operand_a]
-
-    # JEQ
-    def JEQ(self, reg_data, reg_val):
-        # Check if equal flag is set
-        # Then jump to the address stored in the given register
-        if self.fl == 0b00000001:
-            self.pc = self.reg[operand_a]
-        else:
-            self.pc += 2
 
     def load(self, filename):
         """Load a program into memory."""
@@ -209,6 +191,35 @@ class CPU:
                 reg_val = self.ram_read(self.pc + 2)
                 self.alu("ADD", reg_data, reg_val)
                 self.pc += 3
+            # CMP
+            elif instruction == self.opcodes["CMP"]:
+                reg_data = self.ram_read(self.pc + 1)
+                reg_val = self.ram_read(self.pc + 2)
+                self.alu("CMP", reg_data, reg_val)
+                self.pc += 3
+            # JMP
+            elif instruction == self.opcodes["JMP"]:
+                reg_data = self.ram_read(self.pc + 1)
+                # Set the pc to be the address stored in the given register
+                self.pc = self.reg[reg_data]
+            # JEQ
+            elif instruction == self.opcodes["JEQ"]:
+                reg_data = self.ram_read(self.pc + 1)
+                # Check if equal flag is set
+                # Then jump to the address stored in the given register
+                if self.fl == 0b00000001:
+                    self.pc = self.reg[reg_data]
+                else:
+                    self.pc += 2
+            # JNE
+            elif instruction == self.opcodes["JNE"]:
+                reg_data = self.ram_read(self.pc + 1)
+                # Check If equal flag is clear, 
+                # Then jump to the address stored in the given register
+                if self.fl != 0b00000001:
+                    self.pc = self.reg[reg_data]
+                else:
+                    self.pc += 2
             else:
                 sys.exit(1)
 
